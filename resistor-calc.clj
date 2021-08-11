@@ -38,9 +38,67 @@
     'golm 0.1
     'silm 0.01})
 
+    ;; user=> (four-color-resistor 'blu 'vio 'whim)
+    ;; 6.7E10
+
 (defn four-color-resistor [band-1 band-2 multiplier]
     "calculate resistance of a 4-band resistor. colors = first 3 letters, multiplier = colors suffixed with m"
-    (* (reduce + (map color-band [band-1 band-2])) (multiplier-band multiplier)))
+      (let [band-1 (* (color-band band-1) 10) 
+        band-2 (* (color-band band-2) 1)]
+    (* (reduce + [band-1 band-2]) (multiplier-band multiplier))))
+    ;; user=> (four-color-resistor 'red 'yel 'orgm) // oram NOT orgm
+    ;; Execution error (NullPointerException) at (REPL:1).
+    ;; null
+
+   
+
+;; (defn four-color-resistor [one two multiplier]
+;;     "calculate resistance of a 4-band resistor. colors = first 3 letters, multiplier = colors suffixed with m"
+;;       (let [band-1 (* (color-band one) 10) 
+;;         band-2 (* (color-band two) 1)]
+;;     (* (reduce + [band-1 band-2]) (multiplier-band multiplier))))
+;;     ;; user=> (four-color-resistor 'red 'yel 'orgm)
+;;     ;; Execution error (NullPointerException) at (REPL:1).
+;;     ;; null
+
+;; (defn four-color-resistor [one two multiplier]
+;;     "calculate resistance of a 4-band resistor. colors = first 3 letters, multiplier = colors suffixed with m"
+;;       (let [band-1 (* (color-band one) 10) 
+;;         band-2 (* (color-band two) 1)]
+;;     (* (apply + [band-1 band-2]) (multiplier-band multiplier))))
+    ;; user=> (four-color-resistor 'red 'yel 'orgm)
+    ;; Execution error (NullPointerException) at (REPL:1).
+    ;; null
+
+;; user=> (color-band 'red) (color-band 'yel) (multiplier-band 'orgm)
+;; 2
+;; 4
+;; nil
+
+;; user=> (reduce + [(* (color-band 'bro) 10) (* (color-band 'gre) 1)])
+;; 15
+
+;; user=> (* (reduce + [(* (color-band 'bro) 10) (* (color-band 'gre) 1)]) (multiplier-band 'brom))
+;; 150
+
+    (let [band-1 (* (color-band 'bro) 10) 
+        band-2 (* (color-band 'gre) 1)]
+    (* (reduce + [band-1 band-2]) (multiplier-band 'brom)))
+
+
+
+;; user=> (let [band-1 (* (color-band 'bro) 10) 
+;;         band-2 (* (color-band 'gre) 1)]
+;;     (* (reduce + (map color-band [band-1 band-2]))))
+;; Execution error (NullPointerException) at (REPL:1).
+;; null
+
+;; user=>  (let [band-1 (* (color-band 'bro) 10) 
+;;         band-2 (* (color-band 'gre) 1)] band-1)
+;; 10
+;; user=>  (let [band-1 (* (color-band 'bro) 10) 
+;;         band-2 (* (color-band 'gre) 1)] band-2)
+;; 5
 
 ;; color-bands
 ;;    0 black
