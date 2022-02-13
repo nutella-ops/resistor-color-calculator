@@ -1,17 +1,20 @@
+;; scientific abbreviations
 (defn k [n]
-   "x1,000"
+   "input x1,000"
     (* n 1e3))
 
 (defn M [n]
-   "x1,000,000"
+   "input x1,000,000"
     (* n 1e6))
 
 (defn G [n]
-   "x1,000,000,000"
+   "input x1,000,000,000"
     (* n 1e9))
 
+;; data structures representing resistor color bands
+;; python has cartesian product function for interleaving to build color/int data struct
 (def color-band 
-   "dictionary of color-integer encoding"
+   "dictionary of color-integer encodings"
     {'bla 0
     'bro 1
     'red 2
@@ -24,7 +27,7 @@
     'whi 9})
 
 (def multiplier-band
-   "dictionary of color-multipliter encoding"
+   "dictionary of color-multipliter encodings"
     {'blam 1
     'brom 10
     'redm 100
@@ -38,68 +41,87 @@
     'golm 0.1
     'silm 0.01})
 
-    ;; user=> (four-color-resistor 'blu 'vio 'whim)
-    ;; 6.7E10
+(def tolerance-band
+    "dictionary of color-tolerance encoding"
+    {'brot 0.01
+    'redt 0.02
+    'gret 0.005
+    'blut 0.0025
+    'viot 0.001
+    'grat 0.0005
+    'golt 0.05
+    'silt 0.1})
 
-(defn four-color-resistor [band-1 band-2 multiplier]
-    "calculate resistance of a 4-band resistor. colors = first 3 letters, multiplier = colors suffixed with m"
+;; resistor band decoding functions
+(defn four-band [[band-1 band-2 multiplier tolerance]]
+    "translate colors of a 4-band into numbers. colors are all first 3 letters; suffixed with m or t for multiplier or tolerance."
       (let [band-1 (* (color-band band-1) 10) 
-        band-2 (* (color-band band-2) 1)]
-    (* (reduce + [band-1 band-2]) (multiplier-band multiplier))))
-    ;; user=> (four-color-resistor 'red 'yel 'orgm) // oram NOT orgm
-    ;; Execution error (NullPointerException) at (REPL:1).
-    ;; null
+            band-2 (* (color-band band-2) 1)
+            resistor (* (reduce + [band-1 band-2]) (multiplier-band multiplier))
+            neg-tol (* (tolerance-band tolerance) -1)
+            pos-tol (* (tolerance-band tolerance) 1)
+            neg-ohm (+ resistor (* neg-tol resistor))
+            pos-ohm (+ resistor (* pos-tol resistor))
+            percent-display (* pos-tol 100)]
+        [resistor [neg-ohm pos-ohm] percent-display]))
 
-   
+(defn five-band [[band-1 band-2 band-3 multiplier tolerance]]
+    "translate colors of a 5-band into numbers. colors are all first 3 letters; suffixed with m or t for multiplier or tolerance."
+      (let [band-1 (* (color-band band-1) 100) 
+            band-2 (* (color-band band-2) 10)
+            band-3 (* (color-band band-3) 1)
+            resistor (* (reduce + [band-1 band-2 band-3]) (multiplier-band multiplier))
+            neg-tol (* (tolerance-band tolerance) -1)
+            pos-tol (* (tolerance-band tolerance) 1)
+            neg-ohm (+ resistor (* neg-tol resistor))
+            pos-ohm (+ resistor (* pos-tol resistor))
+            percent-display (* pos-tol 100)]
+        [resistor [neg-ohm pos-ohm] percent-display]))
 
-;; (defn four-color-resistor [one two multiplier]
-;;     "calculate resistance of a 4-band resistor. colors = first 3 letters, multiplier = colors suffixed with m"
-;;       (let [band-1 (* (color-band one) 10) 
-;;         band-2 (* (color-band two) 1)]
-;;     (* (reduce + [band-1 band-2]) (multiplier-band multiplier))))
-;;     ;; user=> (four-color-resistor 'red 'yel 'orgm)
-;;     ;; Execution error (NullPointerException) at (REPL:1).
-;;     ;; null
-
-;; (defn four-color-resistor [one two multiplier]
-;;     "calculate resistance of a 4-band resistor. colors = first 3 letters, multiplier = colors suffixed with m"
-;;       (let [band-1 (* (color-band one) 10) 
-;;         band-2 (* (color-band two) 1)]
-;;     (* (apply + [band-1 band-2]) (multiplier-band multiplier))))
-    ;; user=> (four-color-resistor 'red 'yel 'orgm)
-    ;; Execution error (NullPointerException) at (REPL:1).
-    ;; null
-
-;; user=> (color-band 'red) (color-band 'yel) (multiplier-band 'orgm)
-;; 2
-;; 4
-;; nil
-
-;; user=> (reduce + [(* (color-band 'bro) 10) (* (color-band 'gre) 1)])
-;; 15
-
-;; user=> (* (reduce + [(* (color-band 'bro) 10) (* (color-band 'gre) 1)]) (multiplier-band 'brom))
-;; 150
-
-    (let [band-1 (* (color-band 'bro) 10) 
-        band-2 (* (color-band 'gre) 1)]
-    (* (reduce + [band-1 band-2]) (multiplier-band 'brom)))
+(defn spread [[R tol]]
+    "takes a vector [resistance tolerance] and returns a lazy sequence (Rmin Rmax)"
+    (let 
+        [tol-float (/ tol 100.0)
+        delta (* R tol-float)
+        min-val (+ R (- delta))
+        max-val (+ R delta)]
+    (map float [min-val max-val])))
 
 
 
-;; user=> (let [band-1 (* (color-band 'bro) 10) 
-;;         band-2 (* (color-band 'gre) 1)]
-;;     (* (reduce + (map color-band [band-1 band-2]))))
-;; Execution error (NullPointerException) at (REPL:1).
-;; null
 
-;; user=>  (let [band-1 (* (color-band 'bro) 10) 
-;;         band-2 (* (color-band 'gre) 1)] band-1)
-;; 10
-;; user=>  (let [band-1 (* (color-band 'bro) 10) 
-;;         band-2 (* (color-band 'gre) 1)] band-2)
-;; 5
 
+;;;;;;;;;;;;;;;
+;;;; NOTES ;;;;
+;;;;;;;;;;;;;;;
+
+;; template for using resistor min-max as input to practical equations like V = IR
+;; 3.3 = Vcc and 1e3 = mV
+;; (map #(* 1e3 %) (map #(/ 3.3 %) (spread [330 5])))
+
+
+;; later create (four-band-number-to-color) && (five-band-number-to-color)
+;; six-band = five-band + ppm
+
+;; input overloading enabled B)
+;; user=> (pprint (map five-band 
+;;                     [['bro 'red 'bla 'brom 'brot] 
+;;                     ['bro 'bla 'bla 'blam 'brot] 
+;;                     ['bro 'bla 'bla 'yelm 'brot]]))
+
+;; ([1200 [1188.0 1212.0] 1.0]
+;;  [100 [99.0 101.0] 1.0]
+;;  [1000000.0 [990000.0 1010000.0] 1.0])
+
+;; make it int output and ideally add numeric commas
+    ;; user=> (four-color-resistor 'yel 'vio 'redm 'silt)
+    ;; [4700 [4230.0 5170.0] 10.0]
+
+    ;; user=> (four-color-resistor 'yel 'vio 'viom 'silt)
+    ;; [4.7E8 [4.23E8 5.17E8] 10.0]
+
+
+;; REFERENCE VALUES
 ;; color-bands
 ;;    0 black
 ;;    1 brown
@@ -127,7 +149,7 @@
 ;;    silver 0.01 Ω
 
 
-;; tolerances
+;; tolerance-bands
 ;;     Brown ±1%
 ;;     Red ±2%
 ;;     Green ±0.5%
@@ -138,7 +160,7 @@
 ;;     Silver ±10%
 
 
-;; ppm
+;; ppm-bands
 ;;     brown 100ppm
 ;;     red 50ppm
 ;;     orange 15ppm
